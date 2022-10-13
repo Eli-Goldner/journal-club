@@ -1,0 +1,181 @@
+\documentclass[usenames,dvipsnames,pdf]{beamer}
+
+\usepackage{textcomp}
+\usepackage{pifont}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{amsthm}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{cite}
+\usepackage{natbib}
+% \usepackage{tikz}
+\usepackage{bussproofs}
+\usepackage{stmaryrd}
+\usepackage[tableaux]{prooftrees}
+\usepackage{qtree}
+\usepackage{mathtools}
+\usepackage{scalerel,stackengine}
+\usepackage[all]{xy}
+% \usetikzlibrary{automata, positioning, shapes, arrows}
+% \usepackage[dvipsnames]{xcolor}
+
+\usetheme{CambridgeUS}
+
+%\useoutertheme{miniframes} % Alternatively: miniframes, infolines, split
+%\useinnertheme{circles}
+
+%\definecolor{UBCblue}{rgb}{0.04706, 0.13725, 0.26667} % UBC Blue (primary)
+
+% \usecolortheme[named=UBCblue]{structure}
+% \usecolortheme[named=RoyalBlue]{structure}
+\usecolortheme{seahorse}
+
+% \usecolortheme{beaver}
+%\setbeamercolor{spruce}{fg=cyan!90!black}
+
+%\setbeamertemplate{itemize item}{\color{teal}$\blacktriangleright$}
+%\setbeamertemplate{itemize subitem}{\color{teal}$\blacktriangleright$}
+
+\renewcommand{\phi}{\varphi}
+
+% \newcommand{\newState}[4]{\node[state,#3](#1)[#4]{#2};}
+% \newcommand{\newTransition}[4]{\path[->] (#1) edge [#4] node {#3} (#2);} 
+\renewcommand*\linenumberstyle[1]{(#1)}
+\def\apeqA{\SavedStyle\sim}
+\def\apeq{\setstackgap{L}{\dimexpr.5pt+1.5\LMpt}\ensurestackMath{%
+  \ThisStyle{\mathrel{\Centerstack{{\apeqA} {\apeqA}}}}}}
+
+\def\dis{\displaystyle}
+
+\def\QQ{\mathbb Q}
+\def\ZZ{\mathbb Z}
+\def\RR{\mathbb R}
+\def\CC{\mathbb C}
+\def\FF{\mathbb F}
+\def\NN{\mathbb N}
+\def\AA{\mathbb A}
+\def\II{\mathbb I}
+
+\def\Cc{\mathcal C}
+\def\Dd{\mathcal D}
+\def\Pp{\mathcal P}
+
+\def\Af{\mathfrak A}
+\def\Bf{\mathfrak B}
+\def\Cf{\mathfrak C}
+\def\Df{\mathfrak D}
+\def\Ef{\mathfrak E}
+\def\Ff{\mathfrak F}
+\def\Gf{\mathfrak G}
+\def\Hf{\mathfrak H}
+  
+% define 2x2 matrix:
+\newcommand\twodmatrix[4]{ \ensuremath{ \left( 
+	\begin{array}{cc}
+		#1 & #2  \\
+		#3 & #4 
+	\end{array}  
+	\right) } }
+  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamerfont{footnote}{size=\tiny}
+
+\DeclareMathSymbol{:}{\mathord}{operators}{"3A}
+
+\mode<presentation>{}
+%% preamble
+\title{A sequence-to-sequence approach for document-level relation extraction}
+\author{John Giorgi, Gary D. Bader, Bo Wang}
+\begin{document}
+	%% title frame
+	\begin{frame}
+		\titlepage
+	\end{frame}
+
+
+        \section{Overview}
+
+        \begin{frame}{Introduction}
+          \begin{itemize}
+          \item
+            Novel end-to-end joint learning approach for inter-sentence relation extraction.\footnote{Document-level is a stretch, due to encoder limit of 512 tokens they did paragraphs.}
+          \item
+            Utilizes sequence to sequence architecture.
+          \item
+            Representation schema for coreferent entities, $n$-ary relations, and disjoint spans in output.
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Introduction}
+          \begin{itemize}
+          \item
+            New benchmarks for end-to-end results over some biomedical datasets.
+          \item
+            Competitive results against more complex architectures for datasets with established end-to-end results.
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Defining Terms}
+          End-to-end RE:
+          \begin{itemize}
+          \item
+            Relation extraction depends on entities.
+          \item
+            Pipeline methods (current standard), use one or more models for NER, and one or more models for RE over discovered entities.
+          \item
+            End-to-end approaches use one model (possibly with a classification head) to discover the relations, relying on internal representations for entity information.
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Defining Terms}
+          Coreference:
+          \begin{itemize}
+          \item
+            The same entity may have one or more mentions in a given text unit (type vs. token).
+          \item
+            Test
+          \end{itemize}
+        \end{frame}
+        
+        \begin{frame}{Motivation}
+          \begin{itemize}
+          \item
+            Lots of entity and relation information at the document and cross document level.
+          \item
+            Generalizing sentential pipeline methods (the current standard) for inter-sentential RE is very tricky.\footnote{e.g. our NER/RE system for radiotherapy.}
+          \item
+            Lots of information takes the form of $n$-ary relations and disjoint spans
+          \end{itemize}
+        \end{frame}
+        
+        \section{Method}
+        
+        \section{Results}
+        
+        \section{Analysis}
+        
+        \section{Conclusion}
+
+        \begin{frame}{Conclusion}
+        \end{frame}
+
+        \begin{frame}[allowframebreaks]
+          \frametitle{References}
+          \bibliographystyle{acl}
+          %\nocite{quantified}
+          %\nocite{hansen2007tableau} 
+          %\nocite{bolander2009terminating}
+          %\nocite{bolander2007termination}
+          %\nocite{hungar1995if}
+          %\nocite{bhat1998tableau}
+          \bibliography{references}
+        \end{frame}
+      \end{document}
+      
+      
