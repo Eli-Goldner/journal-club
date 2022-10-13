@@ -13,7 +13,7 @@
 \usepackage{multicol}
 \usepackage{cite}
 \usepackage{natbib}
-% \usepackage{tikz}
+\usepackage{adjustbox}
 \usepackage{bussproofs}
 \usepackage{stmaryrd}
 \usepackage[tableaux]{prooftrees}
@@ -42,6 +42,9 @@
 %\setbeamertemplate{itemize subitem}{\color{teal}$\blacktriangleright$}
 
 \renewcommand{\phi}{\varphi}
+
+\graphicspath{ {./images/} }
+
 
 % \newcommand{\newState}[4]{\node[state,#3](#1)[#4]{#2};}
 % \newcommand{\newTransition}[4]{\path[->] (#1) edge [#4] node {#3} (#2);} 
@@ -129,8 +132,12 @@
           \item
             Pipeline methods (current standard), use one or more models for NER, and one or more models for RE over discovered entities.
           \item
-            End-to-end approaches use one model (possibly with a classification head) to discover the relations, relying on internal representations for entity information.
+            End-to-end approaches use one model (possibly with a classification head) to discover the relations,
+            relying on internal representations to jointly extract and implicitly coordinate entity and relation information.
           \end{itemize}
+
+          \textbf{NB:}  The authors use \textit{pipeline} to refer to the RE component.
+          In NER/RE practice, pipeline usually refers to the whole system, NER component included.  
         \end{frame}
 
         \begin{frame}{Defining Terms}
@@ -139,7 +146,7 @@
           \item
             The same entity may have one or more mentions in a given text unit (type vs. token).
           \item
-            Test
+            If a relation holds between two entites, how to reflect this for each entity's mentions?
           \end{itemize}
         \end{frame}
         
@@ -150,13 +157,49 @@
           \item
             Generalizing sentential pipeline methods (the current standard) for inter-sentential RE is very tricky.\footnote{e.g. our NER/RE system for radiotherapy.}
           \item
-            Lots of information takes the form of $n$-ary relations and disjoint spans
+            Lots of information takes the form of $n$-ary relations, tricky to reconstruct this from binary relations.
           \end{itemize}
         \end{frame}
         
         \section{Method}
+
+        \begin{frame}{Linearization Schema}
+          \begin{figure}
+          \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{linearization} 
+          \end{figure}
+        \end{frame}
+
+        \begin{frame}{Linearization Schema Cont.}
+          Schema is:
+
+          
+          \begin{adjustbox}{varwidth=\linewidth}%,scale=0.7}
+            %% \begin{framed}
+            %\centering
+            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $<entity type_1> \dots$}
+
+
+            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $<entity type_m>$}
+
+
+            \small\text{$<relation type>$}
+            \end{adjustbox}
+        \end{frame}
+
+        \begin{frame}{Model Structure}
+          
+        \end{frame}
+
+        \begin{frame}{Evaluation}
+          
+        \end{frame}
         
         \section{Results}
+
+        \begin{frame}{Datasets}
+          
+        \end{frame}
+
         
         \section{Analysis}
         
