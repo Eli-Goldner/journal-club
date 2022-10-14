@@ -167,9 +167,6 @@
           \begin{figure}
           \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{linearization} 
           \end{figure}
-        \end{frame}
-
-        \begin{frame}{Linearization Schema Cont.}
           Schema is:
 
           
@@ -193,15 +190,83 @@
         \begin{frame}{Evaluation}
           
         \end{frame}
+
+        \begin{frame}{Simulating RE on Gold Entities (Entity Hinting)}
+          \begin{figure}
+            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{entity_hint} 
+          \end{figure}
+        \end{frame}
         
         \section{Results}
 
         \begin{frame}{Datasets}
+          \begin{itemize}
+          \item \textbf{CDR}
+
+
+            Chemical-induced disease (CID) relations.  Sentential 
+          \item \textbf{GDA}
+
+
+            Gene-disease associations.  Sentential    
+          \item \textbf{DGM}
+
+            Drug-gene-mutations.  Sentential
+          \item \textbf{DocRED}
+            General domain.  Inter-sentential/document-level
+            
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Datasets}
+          CDR and GDA are annotated over PubMed titles and abstracts.
+          DGM from PubMed articles.
+          DocRED from Wikipedia. \hfill \break \hfill \break
           
+          
+          CDR and DocRED are manually annotated.
+          Unfortunately GDA and DGM are generated via distant supervision.\hfill \break \hfill \break
+
+        
+          
+          DocRED has a very rich taxonomy, 6 entity types and 96 relation types.
         \end{frame}
 
         
         \section{Analysis}
+
+
+        \begin{frame}{$n$-ary Relations (DGM)}
+          \begin{figure}
+            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{DGM_n_ary_comparison} 
+          \end{figure}
+          DGM has ternary relations.
+        \end{frame}
+
+        \begin{frame}{RE with Gold Entities (CDR, GDA)}
+          \begin{figure}
+            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{CDR_GDA_gold_entities} 
+          \end{figure}
+        \end{frame}
+
+        \begin{frame}{End-to-end RE (DocRED)}
+          \begin{figure}
+            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{DocRED_e2e_comparison} 
+          \end{figure}
+        \end{frame}
+
+
+        \begin{frame}{End-to End RE Ablation (CDR, DocRED)}
+          \begin{figure}
+            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{ablation} 
+          \end{figure}
+        \end{frame}
+
+        \begin{frame}{Training Set Size vs. Performance (CDR, GDA)}
+          \begin{figure}
+            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{training_set_size_plateau} 
+          \end{figure}
+        \end{frame}
         
         \section{Conclusion}
 
