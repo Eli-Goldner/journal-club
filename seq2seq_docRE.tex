@@ -120,7 +120,8 @@
           \item
             New benchmarks for end-to-end results over some biomedical datasets.
           \item
-            Competitive results against more complex architectures for datasets with established end-to-end results.
+            Competitive results against more complex architectures for datasets
+            with established end-to-end results.
           \end{itemize}
         \end{frame}
 
@@ -130,10 +131,15 @@
           \item
             Relation extraction depends on entities.
           \item
-            Pipeline methods (current standard), use one or more models for NER, and one or more models for RE over discovered entities.
+            Pipeline methods (current standard),
+            use one or more models for NER,
+            and one or more models for RE over discovered entities.
           \item
-            End-to-end approaches use one model (possibly with a classification head) to discover the relations,
-            relying on internal representations to jointly extract and implicitly coordinate entity and relation information.
+            End-to-end approaches use one model
+            (possibly with a classification head)
+            to discover the relations,
+            relying on internal representations to jointly extract
+            and implicitly coordinate entity and relation information.
           \end{itemize}
 
           \textbf{NB:}  The authors use \textit{pipeline} to refer to the RE component.
@@ -147,6 +153,20 @@
             The same entity may have one or more mentions in a given text unit (type vs. token).
           \item
             If a relation holds between two entites, how to reflect this for each entity's mentions?
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Defining Terms}
+          Sequence to sequence (seq2seq):
+          \begin{itemize}
+          \item
+            Encoder to decoder.
+          \item
+            Encoder maps each input token to a contextual representation.
+          \item
+            Decoder maps each encoder token output and prior context to an output token.
+          \item
+            Sequence cross-entropy loss used in training.
           \end{itemize}
         \end{frame}
         
@@ -167,7 +187,7 @@
           \begin{figure}
           \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{linearization} 
           \end{figure}
-          Schema is:
+          Full schema:
 
           
           \begin{adjustbox}{varwidth=\linewidth}%,scale=0.7}
@@ -184,7 +204,20 @@
         \end{frame}
 
         \begin{frame}{Model Structure}
-          
+          \begin{itemize}
+          \item
+            Seq2seq architectre.
+          \item
+            Decoder: Single-layer LSTM with randomly initialized weights.
+          \item
+            Encoder: PubMedBERT on DGM, GDA, and CDR.  $\text{BERT}_{\text{BASE}}$ for DocRED.
+          \item
+            Decoder generates special $@$START and $@$END tokens, along with entity and relation types.
+          \item
+            Decoder includes entity tokens in ouput via a \textit{copy mechanism}.
+          \item
+            6 head cross attention mechanism\footnote{https://vaclavkosar.com/ml/cross-attention-in-transformer-architecture} between encoder and decoder.
+          \end{itemize}
         \end{frame}
 
         \begin{frame}{Evaluation}
