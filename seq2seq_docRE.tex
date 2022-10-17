@@ -111,7 +111,7 @@
           \item
             Utilizes sequence to sequence architecture.
           \item
-            Representation schema for coreferent entities, $n$-ary relations, and disjoint spans in output.
+            Representation schema for coreferent entities and $n$-ary relations.
           \end{itemize}
         \end{frame}
 
@@ -175,7 +175,8 @@
           \item
             Lots of entity and relation information at the document and cross document level.
           \item
-            Generalizing sentential pipeline methods (the current standard) for inter-sentential RE is very tricky.\footnote{e.g. our NER/RE system for radiotherapy.}
+            Generalizing sentential pipeline methods (the current standard)
+            for inter-sentential RE is involved.\footnote{e.g. our NER/RE system for radiotherapy.}
           \item
             Lots of information takes the form of $n$-ary relations, tricky to reconstruct this from binary relations.
           \end{itemize}
@@ -183,6 +184,33 @@
         
         \section{Method}
 
+
+        \begin{frame}{Datasets}
+          \begin{itemize}
+          \item \textbf{CDR}
+
+
+            Chemical-induced disease (CID) relations, binary relations.   
+          \item \textbf{GDA}
+
+
+            Gene-disease associations, binary relations.  
+          \item \textbf{DGM}
+
+            Drug-gene-mutations, ternary relations.   
+          \item \textbf{DocRED}
+            General domain, binary relations.
+            
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Datasets}
+          \begin{figure}
+            \includegraphics[width=1.0\textwidth,height=1.0\textheight,keepaspectratio]{datasetinfo} 
+          \end{figure}
+        \end{frame}
+       
+        
         \begin{frame}{Linearization Schema}
           \begin{figure}
           \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{linearization} 
@@ -193,16 +221,17 @@
           \begin{adjustbox}{varwidth=\linewidth}%,scale=0.7}
             %% \begin{framed}
             %\centering
-            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $<entity type_1> \dots$}
+            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $@<\textit{entity type}_1> \dots$}
 
 
-            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $<entity type_m>$}
+            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $@<\textit{entity type}_m>$}
 
 
-            \small\text{$<relation type>$}
+            \small\text{$@<\textit{relation type}>$}
             \end{adjustbox}
         \end{frame}
 
+        
         \begin{frame}{Model Structure}
           \begin{itemize}
           \item
@@ -214,57 +243,37 @@
           \item
             Decoder generates special $@$START and $@$END tokens, along with entity and relation types.
           \item
-            Decoder includes entity tokens in ouput via a \textit{copy mechanism}.
+            Decoder includes entity tokens in ouput via a including okens from the input text in output vocabulary\footnote{\textit{copy mechanism} in the authors' terms.}.
           \item
             6 head cross attention mechanism\footnote{https://vaclavkosar.com/ml/cross-attention-in-transformer-architecture} between encoder and decoder.
           \end{itemize}
         \end{frame}
 
-        \begin{frame}{Evaluation}
-          
-        \end{frame}
-
-        \begin{frame}{Simulating RE on Gold Entities (Entity Hinting)}
+        \begin{frame}{RE on Gold Entities with Entity Hinting}
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{entity_hint} 
           \end{figure}
+
+          Full schema:
+
+          \begin{adjustbox}{varwidth=\linewidth}%,scale=0.7}
+            %% \begin{framed}
+            %\centering
+            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $@<\textit{entity type}_1> \dots$}
+
+            
+            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $@<\textit{entity type}_m> \ldots$}
+            
+
+            \small\text{$@\text{SEP}$ $<\textit{input text}>$}
+          \end{adjustbox}
         \end{frame}
+
+        
         
         \section{Results}
 
-        \begin{frame}{Datasets}
-          \begin{itemize}
-          \item \textbf{CDR}
-
-
-            Chemical-induced disease (CID) relations.  Sentential 
-          \item \textbf{GDA}
-
-
-            Gene-disease associations.  Sentential    
-          \item \textbf{DGM}
-
-            Drug-gene-mutations.  Sentential
-          \item \textbf{DocRED}
-            General domain.  Inter-sentential/document-level
-            
-          \end{itemize}
-        \end{frame}
-
-        \begin{frame}{Datasets}
-          CDR and GDA are annotated over PubMed titles and abstracts.
-          DGM from PubMed articles.
-          DocRED from Wikipedia. \hfill \break \hfill \break
-          
-          
-          CDR and DocRED are manually annotated.
-          Unfortunately GDA and DGM are generated via distant supervision.\hfill \break \hfill \break
-
         
-          
-          DocRED has a very rich taxonomy, 6 entity types and 96 relation types.
-        \end{frame}
-
         
         \section{Analysis}
 
@@ -273,19 +282,34 @@
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{DGM_n_ary_comparison} 
           \end{figure}
-          DGM has ternary relations.
+          DGM has ternary relations. Jia et al. (2019) uses multiscale architecture
+          (uses multiple representations over different sizes of text spans and types of sub-relations).
+          Both use gold entities (entity hinting in seq2rel case).
         \end{frame}
 
         \begin{frame}{RE with Gold Entities (CDR, GDA)}
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{CDR_GDA_gold_entities} 
           \end{figure}
+
+          (Not enough room, full breakdown in paper appendix)
         \end{frame}
 
         \begin{frame}{End-to-end RE (DocRED)}
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{DocRED_e2e_comparison} 
           \end{figure}
+
+          Eberts and Ulges (2021) use JEREX.
+          Extends BERT with four task-specific
+          components that use BERTs outputs to per-
+          form entity mention localization, coreference
+          resolution, entity classification, and relation
+          classification. They present two versions of
+          their relation classifier, denoted “global re-
+          lation classifier” (GRC) and “multi-instance
+          relation classifier” (MRC). The authors compare against
+          JEREX-MRC in DocRED end to end.
         \end{frame}
 
 
@@ -293,6 +317,7 @@
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{ablation} 
           \end{figure}
+          Fine-tuning here is fine-tuning of the encoder, decoder is fine-tuned regardless.  
         \end{frame}
 
         \begin{frame}{Training Set Size vs. Performance (CDR, GDA)}
@@ -304,18 +329,9 @@
         \section{Conclusion}
 
         \begin{frame}{Conclusion}
-        \end{frame}
 
-        \begin{frame}[allowframebreaks]
-          \frametitle{References}
-          \bibliographystyle{acl}
-          %\nocite{quantified}
-          %\nocite{hansen2007tableau} 
-          %\nocite{bolander2009terminating}
-          %\nocite{bolander2007termination}
-          %\nocite{hungar1995if}
-          %\nocite{bhat1998tableau}
-          \bibliography{references}
+
+          See paper for bibliography.
         \end{frame}
       \end{document}
       
