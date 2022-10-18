@@ -111,7 +111,9 @@
           \item
             Utilizes sequence to sequence architecture.
           \item
-            Representation schema for coreferent entities and $n$-ary relations.
+            Representation for coreferent entities and $n$-ary relations (\textit{Linearization schema}).
+          \item
+            Can also handle discontinuous (disjoint) and nested entity spans.  
           \end{itemize}
         \end{frame}
 
@@ -120,9 +122,12 @@
           \item
             New benchmarks for end-to-end results over some biomedical datasets.
           \item
+            SOTA for RE with gold entities on two biomedical datasets (DGM, GDA).
+          \item
             Competitive results against more complex architectures for datasets
-            with established end-to-end results.
+            with established end-to-end and gold entity RE results.
           \end{itemize}
+          
         \end{frame}
 
         \begin{frame}{Defining Terms}
@@ -143,7 +148,7 @@
           \end{itemize}
 
           \textbf{NB:}  The authors use \textit{pipeline} to refer to the RE component.
-          In NER/RE practice, pipeline usually refers to the whole system, NER component included.  
+          In NER/RE practice, pipeline usually refers to the whole system, NER included.  
         \end{frame}
 
         \begin{frame}{Defining Terms}
@@ -178,7 +183,9 @@
             Generalizing sentential pipeline methods (the current standard)
             for inter-sentential RE is involved.\footnote{e.g. our NER/RE system for radiotherapy.}
           \item
-            Lots of information takes the form of $n$-ary relations, tricky to reconstruct this from binary relations.
+            Lots of information takes the form of $n$-ary relations, not always easy to reconstruct this from binary relations.
+          \item
+            Handling discontinuous/disjoint and nested entity spans is helpful and not entirely solved.
           \end{itemize}
         \end{frame}
         
@@ -221,13 +228,13 @@
           \begin{adjustbox}{varwidth=\linewidth}%,scale=0.7}
             %% \begin{framed}
             %\centering
-            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $@<\textit{entity type}_1> \dots$}
+            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $@<\textit{entity type}_1 > @ \dots$}
 
 
-            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $@<\textit{entity type}_m>$}
+            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $@<\textit{entity type}_m > @$}
 
 
-            \small\text{$@<\textit{relation type}>$}
+            \small\text{$@ <\textit{relation type}> @$}
             \end{adjustbox}
         \end{frame}
 
@@ -237,18 +244,59 @@
           \item
             Seq2seq architectre.
           \item
-            Decoder: Single-layer LSTM with randomly initialized weights.
-          \item
             Encoder: PubMedBERT on DGM, GDA, and CDR.  $\text{BERT}_{\text{BASE}}$ for DocRED.
           \item
-            Decoder generates special $@$START and $@$END tokens, along with entity and relation types.
+            Decoder: Single-layer LSTM with randomly initialized weights.
           \item
-            Decoder includes entity tokens in ouput via a including okens from the input text in output vocabulary\footnote{\textit{copy mechanism} in the authors' terms.}.
+            Generate output token sequence over decoder outputs via beam search at inference time.  
           \item
-            6 head cross attention mechanism\footnote{https://vaclavkosar.com/ml/cross-attention-in-transformer-architecture} between encoder and decoder.
+            6 head cross attention mechanism
+            \footnote{\url{https://vaclavkosar.com/ml/cross-attention-in-transformer-architecture}}
+            \footnote{\url{https://lena-voita.github.io/nlp_course/seq2seq_and_attention.html\#attention_idea}}
+            between encoder and decoder.
           \end{itemize}
         \end{frame}
 
+        \begin{frame}{Model Structure}
+          \begin{itemize}
+          \item
+            Vocabulary restriction: Decoder can only generate special tokens and tokens from input (\textit{copy mechanism}).
+          \item
+            Sorting relations within target strings according to order of appearence in the text\footnote{Authors pick a convention since cross-entropy loss is permutation-sensitive}.
+          \item
+            Constrained decoding (not used by default): Prevention of syntactically invalid output strings by setting invalid decoder output token scores to near zero.
+          \end{itemize}
+
+        \end{frame}
+        
+        \begin{frame}{Training Strategy}
+          \begin{itemize}
+          \item
+            All parameters trained jointly via AdamW optimizer.
+          \item
+            lr is linearly increased for first 10\% of training steps, linearly decayed to zero for the rest.
+          \item
+            Top $L$ layers of pre-trained encoder re-initialized before fine-tuning.
+          \item
+            Gradients are scaled to a vector norm of 1.0 before backpropagating.
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Training Strategy}
+          \begin{itemize}
+          \item
+            Every forward propagation, hidden state of the LSTM decoder is initialized with the mean of encoder's  token embeddings output.
+          \item
+            Decoder uses dropout with probability 0.1 to inputs,
+            and DropConnect with probability 0.5 to the hidden-to-hidden weights.
+          \item
+            Teacher forcing used for decoder at training time\footnote{\url{https://cedar.buffalo.edu/~srihari/CSE676/10.2.1\%20TeacherForcing.pdf}}.
+          \item
+            Beam search used for output generation at inference time.
+          \end{itemize}
+        \end{frame}
+
+        
         \begin{frame}{RE on Gold Entities with Entity Hinting}
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{entity_hint} 
@@ -259,14 +307,19 @@
           \begin{adjustbox}{varwidth=\linewidth}%,scale=0.7}
             %% \begin{framed}
             %\centering
-            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $@<\textit{entity type}_1> \dots$}
+            \small\text{$<\textit{entity mention}_{1,1}>$ ; ... ; $<\textit{entity mention}_{1,n}>$ $@<\textit{entity type}_1 @> \dots$}
 
             
-            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $@<\textit{entity type}_m> \ldots$}
+            \small\text{$<\textit{entity mention}_{m,1}>$ ; ... ; $<\textit{entity mention}_{m,k}>$ $@<\textit{entity type}_m @> \ldots$}
             
 
-            \small\text{$@\text{SEP}$ $<\textit{input text}>$}
+            \small\text{$@\text{SEP}@$ $<\textit{input text}>$}
           \end{adjustbox}
+
+
+
+          
+          Hinting is omitted for end-to-end.
         \end{frame}
 
         
@@ -282,7 +335,7 @@
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{DGM_n_ary_comparison} 
           \end{figure}
-          DGM has ternary relations. Jia et al. (2019) uses multiscale architecture
+          DGM has ternary relations. Baseline, Jia et al. (2019) uses multiscale architecture
           (uses multiple representations over different sizes of text spans and types of sub-relations).
           Both use gold entities (entity hinting in seq2rel case).
         \end{frame}
@@ -292,46 +345,168 @@
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{CDR_GDA_gold_entities} 
           \end{figure}
 
-          (Not enough room, full breakdown in paper appendix)
+          (Not enough room, full breakdown of baseline approaches in paper appendix {\it G})
         \end{frame}
 
         \begin{frame}{End-to-end RE (DocRED)}
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{DocRED_e2e_comparison} 
           \end{figure}
-
-          Eberts and Ulges (2021) use JEREX.
-          Extends BERT with four task-specific
-          components that use BERTs outputs to per-
-          form entity mention localization, coreference
-          resolution, entity classification, and relation
-          classification. They present two versions of
-          their relation classifier, denoted “global re-
-          lation classifier” (GRC) and “multi-instance
-          relation classifier” (MRC). The authors compare against
-          JEREX-MRC in DocRED end to end.
         \end{frame}
 
+        \begin{frame}{End-to-end RE (DocRED)}          
+          JEREX =  BERT with four joint task-specific
+          FFNN-based components in the following order:
+          \begin{itemize}
+          \item
+            entity mention localization,
+          \item
+            coreference
+            resolution
+          \item
+            entity classification
+          \item relation
+            classification.
+          \end{itemize}
+          Two versions of
+          the relation classifier, “global relation classifier” (GRC) and “multi-instance
+          relation classifier” (MRC). The authors compare against
+          JEREX-MRC for DocRED end to end.
 
-        \begin{frame}{End-to End RE Ablation (CDR, DocRED)}
+        \end{frame}
+
+        \begin{frame}{End-to-end RE Ablation (CDR, DocRED)}
           \begin{figure}
-            \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{ablation} 
+            \includegraphics[width=0.7\textwidth,height=0.4\textheight,keepaspectratio]{ablation} 
           \end{figure}
-          Fine-tuning here is fine-tuning of the encoder, decoder is fine-tuned regardless.  
+          \begin{itemize}
+          \item
+            Fine-tuning here is wrt the encoder.
+          \item
+            Vocab restriction = special tokens + copy mechanism.
+          \item
+            Sorting relations = sorting relations by order of appearance for consistent decoding order.
+          \item
+            Constrained decoding = prevention of syntactically invalid output strings.
+          \end{itemize}
         \end{frame}
 
         \begin{frame}{Training Set Size vs. Performance (CDR, GDA)}
           \begin{figure}
             \includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{training_set_size_plateau} 
           \end{figure}
+
+          Due to logarithmic shape of e2e f1 against train set size authors believe e2e has potential for better scores (vs. asymptotic curves with entity hinting).
+        \end{frame}
+
+        \begin{frame}{Hyperparameter Tuning}
+          \begin{figure}
+            \includegraphics[width=1.0\textwidth,height=1.0\textheight,keepaspectratio]{hyperparameters} 
+          \end{figure}
         \end{frame}
         
         \section{Conclusion}
 
+        \begin{frame}{Strengths}
+          Pure RE (with gold entity hinting)
+          \begin{itemize}
+          \item
+            SOTA on GDA.
+          \item
+            Highly competitive on CDR.
+          \item
+            Markedly simpler architecure than the baselines
+            \footnote{Most construct
+            a document-level graph using dependency parsing,
+            heuristics, or structured attention and then update
+            node and edge representations using propagation.
+            Xu et al. 2021 and Zhou et al. 2021 make modifications
+            to transformer architecure and BERT achitecture respectively}.  
+          \end{itemize}
+          End-to-end
+          \begin{itemize}
+          \item
+            Competitive result against SOTA JEREX.
+          \item
+            Simpler architecture than JEREX.
+          \end{itemize}
+          Linearization schema is easy to interpret.
+          Can handle discontinuous/disjoint and nested entities.
+        \end{frame}
+
+        \begin{frame}{Limitations}
+          Training strategy:
+          \begin{itemize}
+          \item
+            Rationale not fully explained.
+          \item
+            Could use variation in lr scheduling\footnote{Some RT NER models rescued by cosine lr schedule} and other hyperparameters.
+          \item
+            Additional LSTM directionality and layering variation.
+          \item
+            Cross-attention mechanism variation.
+          \item
+            Teacher forcing, while common for seq2seq,
+            gives faster convergence but possibly lower performance at inference due to exposure bias.  
+          \end{itemize}
+        \end{frame}
+
+        \begin{frame}{Limitations}
+          Model structure:
+          \begin{itemize}
+          \item
+            512 token limitation.
+          \item
+            Bevy of architectures (especially transformer-based) for long document processing
+            \footnote{E.g. Tim and Angus have extensive experience with Hierarchical Transformers
+            \url{https://arxiv.org/abs/2110.13711}}  
+          
+            
+          \end{itemize}
+          Linearization schema:
+          \begin{itemize}
+          \item
+            Ideally want order invariant scoring.
+          \item
+            Will this generalize to long documents with frequent correferents?
+          \item
+            $n>3$-ary relations?
+          \end{itemize}
+        \end{frame}
+        
+        
         \begin{frame}{Conclusion}
+          \begin{itemize}
+          \item
+            Novel application of relatively well understood technique for an increasingly relevant task, esp. for clinicald documents.
+          \item
+            Many possible variations of architecture and application.
+          \item
+            Possible to test features/methods from baselines\footnote{dependency parses, document graphs}
+            within this architecture.
+          \item
+            Implementation and behavior tracking easier than competition.
+          \item
+            More efficient than a lot of pipeline models\footnote{E.g. at least one LPLM for NER, at least one for RE}.
+          \end{itemize}
 
+          Full bibliography in paper.
+        \end{frame}
 
-          See paper for bibliography.
+        \begin{frame}{Other Helpful Links}
+          \begin{itemize}
+          \item
+            Seq2seq:
+
+            
+            {\footnotesize \url{https://d2l.ai/chapter_recurrent-modern/seq2seq.html\#sec-seq2seq}}
+          \item
+            Beam search:
+
+            
+            {\small \url{https://d2l.ai/chapter_recurrent-modern/beam-search.html}}
+            
+          \end{itemize}
         \end{frame}
       \end{document}
       
